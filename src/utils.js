@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const url = 'https://javtiful.com/user/theyoungman/playlist?page=$';
-const THROTLE_TIME = 50000;
+const THROTLE_TIME = 1;
 const THROTLE_COUNT_TRIGGER = 10;
 
 async function getFakyutubPlayer(vidId) {

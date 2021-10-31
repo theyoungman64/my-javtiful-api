@@ -1,6 +1,6 @@
 const progressbar = require('progress');
 const fs = require('fs');
-const { scrapFavoritePage, scrapJav } = require('./src/scraper');
+const { scrapFavoritePage, scrapJavPage } = require('./src/scraper-v2');
 const { throtleRequest, countPages } = require('./src/utils');
 
 /**
@@ -12,17 +12,19 @@ const scrapingFavoritePages = async () => {
 	let startTime = new Date();
 	try {
 		let page = await countPages();
+		let bar = new progressbar('Processing page :current', { total: page, width: 50 })
 		tableData.push(...await scrapFavoritePage(1));
 
 		for (let i = 2; i <= page; i++) {
 			tableData.push(...await scrapFavoritePage(i));
+			bar.tick();
 		}
 		return tableData;
 	} catch (err) {
 		console.error(err);
 	} finally {
 		let elapsed = (new Date() - startTime) / 1000;
-		console.log(`time elapsed : ${elapsed}`)
+		console.log(`\ntime elapsed : ${elapsed}`)
 	}
 }
 
@@ -35,7 +37,7 @@ const scrapingFavoriteJav = async (data) => {
 	try {
 		for (const item of data) {
 			let isThrotling = await throtle();
-			fakyutubData.push(await scrapJav(item.link));
+			fakyutubData.push(await scrapJavPage(item.link));
 			let statusThrotling = !isThrotling ? "Throtling..." : "...";
 			bar.tick({
 				'throtling': statusThrotling

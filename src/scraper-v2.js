@@ -37,28 +37,19 @@ async function scarpJavThumb(title) {
  * @description function for scraping single javtiful video
  */
 async function scrapJavPage(url) {
-    // console.log(url);
     const videoPage = await javPageSelector(url);
-    // const codeRegex = require('./field-selector.js').selector['CODE_REGEX']; -- this doesn't work
-    const codeRegex = /((\d|[A-Z])+-\d+|1Pondo (\d|_)+|Caribbeancom( |-)(\d|-)+|10Musume (\d|_)+|HEYZO-\d+|S-Cute-(\d|-|\w)+)|Heydouga (\d|-|\w)/y;
+    const codeRegex = require('./field-selector.js').selector.CODE_REGEX;
     let fakyutubUrl = videoPage('a.dropdown-item[rel="nofollow"][target="_blank"]').first().attr('href');
     let actress = getActress(videoPage);
     let title = videoPage('.box-video-title h1').attr('title');
-    // console.log(title);
-    let regexResult = codeRegex.exec(title);
-    // console.log(/((\d|[A-Z])+-\d+|1Pondo (\d|_)+|Caribbeancom( |-)(\d|-)+|10Musume (\d|_)+|HEYZO-\d+)/y)
-    // console.log(regexResult);
 
     try {
-        let code = regexResult[0];
-        // console.log(code);
+        let code = codeRegex.exec(title)[0];
         let imgUrl = await scarpJavThumb(code);
-
         return { fakyutubUrl, title, actress, url, imgUrl, code };
     } catch (error) {
         console.log('error regex');
         console.log(url);
-        console.log(regexResult);
         console.log(title);
         console.log(fakyutubUrl);
         console.log(actress)
