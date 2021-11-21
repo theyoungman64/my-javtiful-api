@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({path: path.join(__dirname, '.env')});
 const progressbar = require('progress');
 const fs = require('fs');
 const mongoose = require('mongoose');
