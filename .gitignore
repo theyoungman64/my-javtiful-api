@@ -2,3 +2,8 @@
 .vsCode/
 node_modules
 images
+public/javs.json
+javs.json
+sandbox.js
+.npmrc
+.env
