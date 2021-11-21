@@ -1,5 +1,11 @@
+#!/usr/bin/env node
+require('dotenv').config();
 const progressbar = require('progress');
 const fs = require('fs');
+const mongoose = require('mongoose');
+const MONGODB_URI = process.env.DB_URL;
+const Jav = require('./src/model/jav.js')
+
 const { scrapFavoritePage, scrapJavPage } = require('./src/scraper-v2');
 const { throtleRequest, countPages } = require('./src/utils');
 
@@ -12,13 +18,18 @@ const scrapingFavoritePages = async () => {
 	let startTime = new Date();
 	try {
 		let page = await countPages();
-		let bar = new progressbar('Processing page :current', { total: page, width: 50 })
-		tableData.push(...await scrapFavoritePage(1));
+		let bar = new progressbar('Processing page :current', { total: page, width: 50 });
+		await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-		for (let i = 2; i <= page; i++) {
-			tableData.push(...await scrapFavoritePage(i));
+		for (let i = 1; i <= page; i++) {
+			let pageUrlLink = await scrapFavoritePage(i);
+			let urlLink = pageUrlLink.map(item => item.link);
+
+			let dbPageLink = await Jav.find({ 'javtiful.url': { $in: urlLink } }).exec();
+			tableData.push(...pageUrlLink.filter(item => !dbPageLink.map(item => item.javtiful.url).includes(item.link)));
 			bar.tick();
 		}
+
 		return tableData;
 	} catch (err) {
 		console.error(err);
@@ -33,11 +44,15 @@ const scrapingFavoriteJav = async (data) => {
 	let dataLength = data.length;
 	let throtle = throtleRequest();
 	let startTime = new Date();
+	console.log(`jav count : ${data.length}`)
 	bar = new progressbar('downloading :percent :current :throtling [:bar]', { incomplete: '.', total: dataLength, width: 50 });
 	try {
 		for (const item of data) {
 			let isThrotling = await throtle();
-			fakyutubData.push(await scrapJavPage(item.link));
+			let javPage = await scrapJavPage(item.link)
+			fakyutubData.push(javPage);
+			
+			await Jav.create({ code: javPage.code, actress: javPage.actress, javtiful: { url: javPage.url, title: javPage.title, imgUrl: javPage.imgUrl } });
 			let statusThrotling = !isThrotling ? "Throtling..." : "...";
 			bar.tick({
 				'throtling': statusThrotling
@@ -49,34 +64,26 @@ const scrapingFavoriteJav = async (data) => {
 	} finally {
 		let elapsed = (new Date() - startTime) / 1000;
 		console.log(`time elapsed : ${elapsed}`)
+		await mongoose.disconnect();
 	}
 }
 
 const arg = process.argv.slice(2)[0];
 
 if (arg === '--get-favorite-jav-link') {
-	scrapingFavoritePages().then(data => {
-		let toFile = JSON.stringify(data);
-		fs.writeFileSync('public/javtiful-link.json', toFile);
-	}).catch(err => {
-		console.log(err);
-	});
-} else if (arg === '--get-fakyutube-link') {
-	let rawData = fs.readFileSync('public/javtiful-link.json');
-	let list = JSON.parse(rawData);
-	// console.log(list);
-	scrapingFavoriteJav(list).then(data => {
-		let toFile = JSON.stringify(data);
-		fs.writeFileSync('fakyutub-link.json', toFile);
-	});
+
+} else if (arg === 'update') {
+
 } else if (arg === 'scrap') {
 	scrapingFavoritePages()
 		.then(data => {
 			return scrapingFavoriteJav(data);
 		}).then(data => {
 			let toFile = JSON.stringify(data);
-			fs.writeFileSync('public/javs.json', toFile);
+			// fs.writeFileSync('public/javs.json', toFile);
 		}).catch(err => {
 			console.log(err.response);
 		})
 }
+
+module.exports = { scrapingFavoritePages, scrapingFavoriteJav }
