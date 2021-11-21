@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const url = 'https://javtiful.com/user/theyoungman/playlist?page=$';
+const JAVTIFUL_PLAYLIST_PAGE_URL = 'https://javtiful.com/user/theyoungman/playlist?page=$';
 const THROTLE_TIME = 1;
 const THROTLE_COUNT_TRIGGER = 10;
 
@@ -10,7 +10,7 @@ async function getFakyutubPlayer(vidId) {
 }
 
 async function countPages() {
-	const { data } = await axios.get(url.replace('$', 1));
+	const { data } = await axios.get(JAVTIFUL_PLAYLIST_PAGE_URL.replace('$', 1));
 	const sel = cheerio.load(data);
 
 	let itemsCount = parseInt(sel('.content-header-title > h1').text().replace(/\D+/g, ''));
@@ -18,11 +18,7 @@ async function countPages() {
 	return page;
 }
 
-/**\
- * 
- */
 function throtleRequest() {
-	//TODO: make parameter counter & timeout
 	let counter = 0;
 
 	return function () {
@@ -51,4 +47,16 @@ function getActress(videoPage) {
 	return resultActress;
 }
 
-module.exports = { throtleRequest, getFakyutubPlayer, countPages, getActress }
+function getDetail(videoPage) {
+	let detailObject = {};
+	let keys = videoPage(require('./field-selector').selector.DETAIL_KEYS);
+	let values = videoPage(require('./field-selector').selector.DETAIL_VALUES);
+	keys.map((index, item) => {
+		
+		detailObject[item.children[0].data] = values[index].children[0].data;
+	});
+	console.log(detailObject);
+	console.log(values[1].children.innerHtml)
+}
+
+module.exports = { throtleRequest, getFakyutubPlayer, countPages, getActress, getDetail }

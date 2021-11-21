@@ -1,7 +1,11 @@
 const { favoritePageSelector, fakyutubSelector, javPageSelector, javSearchSelector } = require('./selector');
 const { getActress } = require('./utils.js')
-const { selector } = require('./field-selector.js');
 
+/**
+ * 
+ * @param {*} pageNum 
+ * @returns Object {page: Number, link: String}
+ */
 async function scrapFavoritePage(pageNum) {
     let items = [];
 
@@ -23,8 +27,8 @@ async function scrapFakyutub(fakyutubUrl) {
     return { imgUrl }
 }
 
-async function scarpJavThumb(title) {
-    let selector = await javSearchSelector(title);
+async function scarpJavThumb(code) {
+    let selector = await javSearchSelector(code);
     return selector('a.ezmn > img').first().attr('data-original')
 }
 
