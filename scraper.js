@@ -48,6 +48,7 @@ const scrapingFavoriteJav = async (data) => {
 	console.log(`jav count : ${data.length}`)
 	bar = new progressbar('downloading :percent :current :throtling [:bar]', { incomplete: '.', total: dataLength, width: 50 });
 	try {
+		data.reverse();
 		for (const item of data) {
 			let isThrotling = await throtle();
 			let javPage = await scrapJavPage(item.link)
