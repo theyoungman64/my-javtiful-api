@@ -60,7 +60,16 @@ const scrapingFavoriteJav = async (data) => {
 			let javPage = await scrapJavPage(item.link)
 			fakyutubData.push(javPage);
 
-			await Jav.create({ code: javPage.code, actress: javPage.actress, javtiful: { fakyutubUrl: javPage.fakyutubUrl, url: javPage.url, title: javPage.title, imgUrl: javPage.imgUrl } });
+			await Jav.create({
+				code: javPage.code,
+				actress: javPage.actress,
+				javtiful: {
+					fakyutubUrl: javPage.fakyutubUrl,
+					url: javPage.url,
+					title: javPage.title,
+					imgUrl: javPage.imgUrl
+				}
+			});
 			let statusThrotling = !isThrotling ? "Throtling..." : "...";
 			bar.tick({
 				'throtling': statusThrotling
