@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
-require('dotenv').config({path: path.join(__dirname, '.env')});
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const progressbar = require('progress');
 const fs = require('fs');
 const mongoose = require('mongoose');
@@ -18,17 +18,23 @@ const scrapingFavoritePages = async () => {
 	let tableData = [];
 	let startTime = new Date();
 	try {
-		let page = await countPages();
-		let bar = new progressbar('Processing page :current', { total: page, width: 50 });
 		await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-		for (let i = 1; i <= page; i++) {
-			let pageUrlLink = await scrapFavoritePage(i);
-			let urlLink = pageUrlLink.map(item => item.link);
+		let i = 1;
+		let loop = true;
 
-			let dbPageLink = await Jav.find({ 'javtiful.url': { $in: urlLink } }).exec();
-			tableData.push(...pageUrlLink.filter(item => !dbPageLink.map(item => item.javtiful.url).includes(item.link)));
-			bar.tick();
+		while (loop) {
+			loop = false;
+			let pageUrlLink = await scrapFavoritePage(i);
+
+			if (pageUrlLink) {
+				let urlLink = pageUrlLink.map(item => item.link);
+
+				let dbPageLink = await Jav.find({ 'javtiful.url': { $in: urlLink } }).exec();
+				tableData.push(...pageUrlLink.filter(item => !dbPageLink.map(item => item.javtiful.url).includes(item.link)));
+				loop = true;
+				i++;
+			}
 		}
 
 		return tableData;

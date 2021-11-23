@@ -4,7 +4,7 @@ const { getActress } = require('./utils.js')
 /**
  * 
  * @param {*} pageNum 
- * @returns Object {page: Number, link: String}
+ * @returns Object {page: Number, link: String}. False if the page is invalid
  */
 async function scrapFavoritePage(pageNum) {
     let items = [];
@@ -18,7 +18,8 @@ async function scrapFavoritePage(pageNum) {
         }
         items.push(rowData);
     })
-    return items;
+    let currentActivePage = parseInt(sel('li.page-item.active span.page-link').html());
+    return (currentActivePage === pageNum) ? items : false;
 }
 
 async function scrapFakyutub(fakyutubUrl) {
