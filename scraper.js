@@ -14,7 +14,7 @@ const { throtleRequest, countPages } = require('./src/utils');
  * Scraping all JAV link on the favorite JAV
  * @returns {Promise}
  */
-const scrapingFavoritePages = async () => {
+const scrapingFavoritePages = async ({ firstNPage }) => {
 	let tableData = [];
 	let startTime = new Date();
 	try {
@@ -23,8 +23,9 @@ const scrapingFavoritePages = async () => {
 		let i = 1;
 		let loop = true;
 
-		while (loop) {
+		while (loop && ((i <= firstNPage) || firstNPage)) {
 			loop = false;
+			console.log(`scraping page ${i}`)
 			let pageUrlLink = await scrapFavoritePage(i);
 
 			if (pageUrlLink) {
@@ -92,7 +93,7 @@ if (arg === '--get-favorite-jav-link') {
 } else if (arg === 'update') {
 
 } else if (arg === 'scrap') {
-	scrapingFavoritePages()
+	scrapingFavoritePages({ firstNPage: Number(process.argv[3] || true) })
 		.then(data => {
 			return scrapingFavoriteJav(data);
 		}).then(data => {
