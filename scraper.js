@@ -23,7 +23,7 @@ const scrapingFavoritePages = async ({ firstNPage }) => {
 		let i = 1;
 		let loop = true;
 
-		while (loop && ((i <= firstNPage) || firstNPage)) {
+		while (loop) {
 			loop = false;
 			console.log(`scraping page ${i}`)
 			let pageUrlLink = await scrapFavoritePage(i);
@@ -35,6 +35,9 @@ const scrapingFavoritePages = async ({ firstNPage }) => {
 				tableData.push(...pageUrlLink.filter(item => !dbPageLink.map(item => item.javtiful.url).includes(item.link)));
 				loop = true;
 				i++;
+			}
+			if (firstNPage) {
+				loop = firstNPage >= i ? true : false;
 			}
 		}
 
@@ -93,7 +96,7 @@ if (arg === '--get-favorite-jav-link') {
 } else if (arg === 'update') {
 
 } else if (arg === 'scrap') {
-	scrapingFavoritePages({ firstNPage: Number(process.argv[3] || true) })
+	scrapingFavoritePages({ firstNPage: Number(process.argv[3] || false) })
 		.then(data => {
 			return scrapingFavoriteJav(data);
 		}).then(data => {
