@@ -100,11 +100,13 @@ if (arg === '--get-favorite-jav-link') {
 		.then(data => {
 			return scrapingFavoriteJav(data);
 		}).then(data => {
-			let toFile = JSON.stringify(data);
+			// let toFile = JSON.stringify(data);
 			// fs.writeFileSync('public/javs.json', toFile);
+			process.exit(0);
 		}).catch(err => {
 			console.log(err.response);
-		})
+			process.exit(1)
+		});
 }
 
 module.exports = { scrapingFavoritePages, scrapingFavoriteJav }
