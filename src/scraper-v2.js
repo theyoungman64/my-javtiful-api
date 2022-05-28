@@ -44,7 +44,7 @@ async function scarpJavThumb(code) {
 async function scrapJavPage(url) {
     const videoPage = await javPageSelector(url);
     const codeRegex = require('./field-selector.js').selector.CODE_REGEX;
-    let fakyutubUrl = videoPage('a.dropdown-item[rel="nofollow"][target="_blank"]').first().attr('href');
+    let fakyutubUrl = videoPage('#dl_serverft').first().attr('href');
     let actress = getActress(videoPage);
     let title = videoPage('.box-video-title h1').attr('title');
 
